@@ -1,6 +1,8 @@
 from customtkinter import *
 import pandas as pd
 
+# //Review mode/normal mode deletion of items index out of range
+
 
 def get_flashcards(csv_file: str):
     """Load flashcards from a CSV file."""
@@ -92,18 +94,23 @@ def add_flashcard_to_incorrect_list(flashcard_idx: int):
 
 def mark_correct_and_continue():
     """Remove the current flashcard from the incorrect list and navigate."""
-    if review_mode:
-        global curr_flashcard_idx, incorrect_terms, incorrect_definitions
-        incorrect_terms.remove(terms[curr_flashcard_idx])
-        incorrect_definitions.remove(definitions[curr_flashcard_idx])
+    global curr_flashcard_idx, incorrect_terms, incorrect_definitions
+    if review_mode and curr_flashcard_idx < len(terms):
+        term_to_remove = terms[curr_flashcard_idx]
+        definition_to_remove = definitions[curr_flashcard_idx]
 
-        # If the incorrect list is empty, switch back to normal mode
+        if term_to_remove in incorrect_terms:
+            incorrect_terms.remove(term_to_remove)
+        if definition_to_remove in incorrect_definitions:
+            incorrect_definitions.remove(definition_to_remove)
+
+        # Check if review list is empty
         if not incorrect_terms:
             switch_to_normal_mode()
-            curr_flashcard_idx = 0
-            show_flashcard()
-    if terms[curr_flashcard_idx] not in incorrect_terms or review_mode:
-        change_flashcard("fwd")
+            return
+
+    # Navigate to the next flashcard
+    change_flashcard("fwd")
 
 
 # Load flashcards from file
@@ -115,7 +122,7 @@ answer_shown = False
 # Create GUI
 root = CTk()
 root.title("Flashcard App")
-root.geometry("600x500")
+root.geometry("600x400")
 
 # Flashcard Frame
 flashcard_frame = CTkFrame(root)
