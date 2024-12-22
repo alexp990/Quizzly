@@ -45,6 +45,26 @@ def show_or_hide_answer():
         answer_label.config(text="No flashcards available to reveal.")
 
 
+def switch_to_review_mode():
+    global terms, definitions, curr_flashcard_idx, review_mode
+    """Allows user to review the cards they got wrong"""
+    terms = incorrect_terms
+    definitions = incorrect_definitions
+    curr_flashcard_idx = 0
+    show_flashcard()
+    review_mode = True
+    print("review mode")
+
+
+def switch_to_normal_mode():
+    global terms, definitions, curr_flashcard_idx
+    """Switches back to normal mode with all loaded flashcards"""
+    terms, definitions = get_flashcards(flashcards_path)
+    curr_flashcard_idx = 0
+    show_flashcard()
+    print("normal mode")
+
+
 def change_flashcard(action: str):
     """Move to the next or previous flashcard."""
     global curr_flashcard_idx
@@ -67,8 +87,23 @@ def add_flashcard_to_incorrect_list(flashcard_idx: int):
 
     if definitions[flashcard_idx] not in incorrect_definitions:
         incorrect_definitions.append(definitions[flashcard_idx])
-
     print(incorrect_terms, incorrect_definitions)
+
+
+def mark_correct_and_continue():
+    """Remove the current flashcard from the incorrect list and navigate."""
+    if review_mode:
+        global curr_flashcard_idx, incorrect_terms, incorrect_definitions
+        incorrect_terms.remove(terms[curr_flashcard_idx])
+        incorrect_definitions.remove(definitions[curr_flashcard_idx])
+
+        # If the incorrect list is empty, switch back to normal mode
+        if not incorrect_terms:
+            switch_to_normal_mode()
+            curr_flashcard_idx = 0
+            show_flashcard()
+    if terms[curr_flashcard_idx] not in incorrect_terms or review_mode:
+        change_flashcard("fwd")
 
 
 # Load flashcards from file
@@ -100,14 +135,23 @@ prev_button = tk.Button(root, text="Previous Flashcard",
                         font=("Arial", 14), command=lambda: change_flashcard("bwd"))
 prev_button.pack(pady=5)
 
+review_mode_button = tk.Button(root, text="Review mode",
+                               font=("Arial", 10), command=switch_to_review_mode)
+review_mode_button.pack(pady=5)
+
+normal_mode_button = tk.Button(root, text="Normal Mode",
+                               font=("Arial", 10), command=switch_to_normal_mode)
+normal_mode_button.pack(pady=5)
+
 # Keybinds for checking
 root.bind("1", lambda event: add_flashcard_to_incorrect_list(
     curr_flashcard_idx))  # *1: incorrect
-root.bind("2", lambda event: change_flashcard("fwd"))  # *2: incorrect
+root.bind("2", lambda event: mark_correct_and_continue())  # *2: incorrect
 
 # Start with the first flashcard
 show_flashcard()
 incorrect_terms = []
 incorrect_definitions = []
+review_mode = False
 
 root.mainloop()
