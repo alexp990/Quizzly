@@ -1,4 +1,4 @@
-import tkinter as tk
+from customtkinter import *
 import pandas as pd
 
 
@@ -23,12 +23,12 @@ def show_flashcard():
     answer_shown = False  # Reset answer visibility
     if terms:
         term = terms[curr_flashcard_idx]
-        question_label.config(text=term, font=("Arial", 16))
-        answer_label.config(text="")
+        question_label.configure(text=term, font=("Arial", 16))
+        answer_label.configure(text="")
     else:
-        question_label.config(
+        question_label.configure(
             text="No flashcards available.", font=("Arial", 16))
-        answer_label.config(text="")
+        answer_label.configure(text="")
 
 
 def show_or_hide_answer():
@@ -38,11 +38,11 @@ def show_or_hide_answer():
         answer_shown = not answer_shown
         if answer_shown:
             definition = definitions[curr_flashcard_idx]
-            answer_label.config(text=definition, font=("Arial", 14))
+            answer_label.configure(text=definition, font=("Arial", 14))
         else:
-            answer_label.config(text="")
+            answer_label.configure(text="")
     else:
-        answer_label.config(text="No flashcards available to reveal.")
+        answer_label.configure(text="No flashcards available to reveal.")
 
 
 def switch_to_review_mode():
@@ -75,7 +75,7 @@ def change_flashcard(action: str):
             curr_flashcard_idx = (curr_flashcard_idx - 1) % len(terms)
         show_flashcard()
     else:
-        question_label.config(text="No flashcards to navigate.")
+        question_label.configure(text="No flashcards to navigate.")
 
 
 def add_flashcard_to_incorrect_list(flashcard_idx: int):
@@ -113,35 +113,59 @@ curr_flashcard_idx = 0
 answer_shown = False
 
 # Create GUI
-root = tk.Tk()
-root.title("Flashcards App")
+root = CTk()
+root.title("Flashcard App")
+root.geometry("600x500")
 
-question_label = tk.Label(root, text="", wraplength=400, justify="center")
-question_label.pack(pady=20)
+# Flashcard Frame
+flashcard_frame = CTkFrame(root)
+flashcard_frame.pack(pady=20, padx=20, fill="x")
 
-answer_label = tk.Label(root, text="", wraplength=400,
-                        justify="center", fg="blue")
-answer_label.pack(pady=10)
+# Question Label Frame
+question_frame = CTkFrame(
+    flashcard_frame, fg_color="#4c75b0", corner_radius=10)
+question_frame.pack(pady=10, padx=10, fill="x")
+question_label = CTkLabel(question_frame, text="",
+                          wraplength=500, font=("Arial", 16), anchor="center")
+question_label.pack(pady=10, padx=10)
 
-reveal_button = tk.Button(root, text="Show/Hide Answer",
+# Answer Label Frame
+answer_frame = CTkFrame(flashcard_frame, fg_color="#4c75b0",
+                        corner_radius=10)
+answer_frame.pack(pady=10, padx=10, fill="x")
+answer_label = CTkLabel(answer_frame, text="", wraplength=500, font=(
+    "Arial", 16, "italic"), text_color="blue", anchor="center")
+answer_label.pack(pady=10, padx=10)
+
+# Navigation Buttons Frame
+nav_frame = CTkFrame(root)
+nav_frame.pack(pady=(10, 0))
+
+prev_button = CTkButton(nav_frame, text="Previous", font=(
+    "Arial", 14), command=lambda: change_flashcard("bwd"))
+prev_button.grid(row=0, column=0, padx=10, pady=10)
+
+next_button = CTkButton(nav_frame, text="Next", font=(
+    "Arial", 14), command=lambda: change_flashcard("fwd"))
+next_button.grid(row=0, column=1, padx=10, pady=10)
+
+# Reveal Answer Button
+reveal_button = CTkButton(root, text="Show/Hide Answer",
                           font=("Arial", 14), command=show_or_hide_answer)
-reveal_button.pack(pady=5)
+reveal_button.pack(pady=20)
 
-next_button = tk.Button(root, text="Next Flashcard",
-                        font=("Arial", 14), command=lambda: change_flashcard("fwd"))
-next_button.pack(pady=5)
+# Mode Buttons Frame
+mode_frame = CTkFrame(root)
+mode_frame.pack(pady=(10, 20))
 
-prev_button = tk.Button(root, text="Previous Flashcard",
-                        font=("Arial", 14), command=lambda: change_flashcard("bwd"))
-prev_button.pack(pady=5)
+review_mode_button = CTkButton(mode_frame, text="Review Mode", font=(
+    "Arial", 12), command=switch_to_review_mode)
+review_mode_button.grid(row=0, column=0, padx=10, pady=10)
 
-review_mode_button = tk.Button(root, text="Review mode",
-                               font=("Arial", 10), command=switch_to_review_mode)
-review_mode_button.pack(pady=5)
+normal_mode_button = CTkButton(mode_frame, text="Normal Mode", font=(
+    "Arial", 12), command=switch_to_normal_mode)
+normal_mode_button.grid(row=0, column=1, padx=10, pady=10)
 
-normal_mode_button = tk.Button(root, text="Normal Mode",
-                               font=("Arial", 10), command=switch_to_normal_mode)
-normal_mode_button.pack(pady=5)
 
 # Keybinds for checking
 root.bind("1", lambda event: add_flashcard_to_incorrect_list(
