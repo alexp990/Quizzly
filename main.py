@@ -58,6 +58,19 @@ def change_flashcard(action: str):
         question_label.config(text="No flashcards to navigate.")
 
 
+def add_flashcard_to_incorrect_list(flashcard_idx: int):
+    """Adds flashcard to list of incorrect flashcards"""
+    global incorrect_terms
+    global incorrect_definitions
+    if terms[flashcard_idx] not in incorrect_terms:
+        incorrect_terms.append(terms[flashcard_idx])
+
+    if definitions[flashcard_idx] not in incorrect_definitions:
+        incorrect_definitions.append(definitions[flashcard_idx])
+
+    print(incorrect_terms, incorrect_definitions)
+
+
 # Load flashcards from file
 flashcards_path = "test_flashcards.csv"
 terms, definitions = get_flashcards(flashcards_path)
@@ -87,7 +100,14 @@ prev_button = tk.Button(root, text="Previous Flashcard",
                         font=("Arial", 14), command=lambda: change_flashcard("bwd"))
 prev_button.pack(pady=5)
 
+# Keybinds for checking
+root.bind("1", lambda event: add_flashcard_to_incorrect_list(
+    curr_flashcard_idx))  # *1: incorrect
+root.bind("2", lambda event: change_flashcard("fwd"))  # *2: incorrect
+
 # Start with the first flashcard
 show_flashcard()
+incorrect_terms = []
+incorrect_definitions = []
 
 root.mainloop()
