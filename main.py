@@ -41,6 +41,13 @@ def show_or_hide_answer():
         if answer_shown:
             definition = definitions[curr_flashcard_idx]
             answer_label.configure(text=definition, font=("Arial", 14))
+            if write_mode:
+                user_entry = str(answer_entry.get()).strip().lower()
+                if user_entry == definition.strip().lower():
+                    print("Correct!")
+                    mark_correct_and_continue()
+                else:
+                    print("Wrong!")
         else:
             answer_label.configure(text="")
     else:
@@ -75,6 +82,7 @@ def change_flashcard(action: str):
             curr_flashcard_idx = (curr_flashcard_idx + 1) % len(terms)
         elif action == "bwd":
             curr_flashcard_idx = (curr_flashcard_idx - 1) % len(terms)
+        answer_entry.delete(0, "end")
         show_flashcard()
     else:
         question_label.configure(text="No flashcards to navigate.")
@@ -113,11 +121,23 @@ def mark_correct_and_continue():
     change_flashcard("fwd")
 
 
+def switch_modes():
+    global normal_mode, write_mode
+    normal_mode = not normal_mode
+    write_mode = not write_mode
+    if normal_mode:
+        switch_modes_button.configure(text="Switch to Write Mode")
+    else:
+        switch_modes_button.configure(text="Switch to Normal Mode")
+
+
 # Load flashcards from file
-flashcards_path = "test_flashcards.csv"
+flashcards_path = "C:/Users/a_pavlov23/OneDrive - Winchester College/Documents/GitHub/Quizzly/test_flashcards.csv"
 terms, definitions = get_flashcards(flashcards_path)
 curr_flashcard_idx = 0
 answer_shown = False
+normal_mode = True
+write_mode = False
 
 # Create GUI
 root = CTk()
@@ -131,18 +151,28 @@ flashcard_frame.pack(pady=20, padx=20, fill="x")
 # Question Label Frame
 question_frame = CTkFrame(
     flashcard_frame, fg_color="#4c75b0", corner_radius=10)
-question_frame.pack(pady=10, padx=10, fill="x")
+question_frame.pack(pady=3, padx=10, fill="x")
 question_label = CTkLabel(question_frame, text="",
                           wraplength=500, font=("Arial", 16), anchor="center")
-question_label.pack(pady=10, padx=10)
+question_label.pack(pady=3, padx=10)
 
 # Answer Label Frame
 answer_frame = CTkFrame(flashcard_frame, fg_color="#4c75b0",
                         corner_radius=10)
-answer_frame.pack(pady=10, padx=10, fill="x")
+answer_frame.pack(pady=3, padx=10, fill="x")
 answer_label = CTkLabel(answer_frame, text="", wraplength=500, font=(
     "Arial", 16, "italic"), text_color="blue", anchor="center")
-answer_label.pack(pady=10, padx=10)
+answer_label.pack(pady=3, padx=10)
+
+# Answer Text Entry
+answer_entry = CTkEntry(root, fg_color="#4c75b0",
+                        corner_radius=10, text_color="yellow")
+answer_entry.pack(pady=2, padx=30, fill="x")
+
+# Switch to write mode
+switch_modes_button = CTkButton(
+    root, text="Switch to write mode", font=("Arial", 14), command=switch_modes)
+switch_modes_button.pack(pady=20, padx=10)
 
 # Navigation Buttons Frame
 nav_frame = CTkFrame(root)
@@ -150,11 +180,11 @@ nav_frame.pack(pady=(10, 0))
 
 prev_button = CTkButton(nav_frame, text="Previous", font=(
     "Arial", 14), command=lambda: change_flashcard("bwd"))
-prev_button.grid(row=0, column=0, padx=10, pady=10)
+prev_button.grid(row=0, column=0, padx=10, pady=3)
 
 next_button = CTkButton(nav_frame, text="Next", font=(
     "Arial", 14), command=lambda: change_flashcard("fwd"))
-next_button.grid(row=0, column=1, padx=10, pady=10)
+next_button.grid(row=0, column=1, padx=10, pady=3)
 
 # Reveal Answer Button
 reveal_button = CTkButton(root, text="Show/Hide Answer",
@@ -167,11 +197,11 @@ mode_frame.pack(pady=(10, 20))
 
 review_mode_button = CTkButton(mode_frame, text="Review Mode", font=(
     "Arial", 12), command=switch_to_review_mode)
-review_mode_button.grid(row=0, column=0, padx=10, pady=10)
+review_mode_button.grid(row=0, column=0, padx=10, pady=3)
 
 normal_mode_button = CTkButton(mode_frame, text="Normal Mode", font=(
     "Arial", 12), command=switch_to_normal_mode)
-normal_mode_button.grid(row=0, column=1, padx=10, pady=10)
+normal_mode_button.grid(row=0, column=1, padx=10, pady=3)
 
 
 # Keybinds for checking
