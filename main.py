@@ -1,5 +1,6 @@
 from customtkinter import *
 import pandas as pd
+import time
 
 # //Review mode/normal mode deletion of items index out of range
 
@@ -45,9 +46,11 @@ def show_or_hide_answer():
                 user_entry = str(answer_entry.get()).strip().lower()
                 if user_entry == definition.strip().lower():
                     print("Correct!")
-                    mark_correct_and_continue()
+                    answer_entry.configure(text_color="#4ceb34")
                 else:
                     print("Wrong!")
+                    answer_entry.configure(text_color="red")
+                    add_flashcard_to_incorrect_list(curr_flashcard_idx)
         else:
             answer_label.configure(text="")
     else:
@@ -61,6 +64,8 @@ def switch_to_review_mode():
     definitions = incorrect_definitions
     curr_flashcard_idx = 0
     show_flashcard()
+    if write_mode:
+        answer_entry.configure(text_color="yellow")
     review_mode = True
     print("review mode")
 
@@ -70,6 +75,8 @@ def switch_to_normal_mode():
     """Switches back to normal mode with all loaded flashcards"""
     terms, definitions = get_flashcards(flashcards_path)
     curr_flashcard_idx = 0
+    if write_mode:
+        answer_entry.configure(text_color="yellow")
     show_flashcard()
     print("normal mode")
 
@@ -83,6 +90,7 @@ def change_flashcard(action: str):
         elif action == "bwd":
             curr_flashcard_idx = (curr_flashcard_idx - 1) % len(terms)
         answer_entry.delete(0, "end")
+        answer_entry.configure(text_color="yellow")
         show_flashcard()
     else:
         question_label.configure(text="No flashcards to navigate.")
@@ -102,23 +110,24 @@ def add_flashcard_to_incorrect_list(flashcard_idx: int):
 
 def mark_correct_and_continue():
     """Remove the current flashcard from the incorrect list and navigate."""
-    global curr_flashcard_idx, incorrect_terms, incorrect_definitions
-    if review_mode and curr_flashcard_idx < len(terms):
-        term_to_remove = terms[curr_flashcard_idx]
-        definition_to_remove = definitions[curr_flashcard_idx]
+    if not write_mode:
+        global curr_flashcard_idx, incorrect_terms, incorrect_definitions
+        if review_mode and curr_flashcard_idx < len(terms):
+            term_to_remove = terms[curr_flashcard_idx]
+            definition_to_remove = definitions[curr_flashcard_idx]
 
-        if term_to_remove in incorrect_terms:
-            incorrect_terms.remove(term_to_remove)
-        if definition_to_remove in incorrect_definitions:
-            incorrect_definitions.remove(definition_to_remove)
+            if term_to_remove in incorrect_terms:
+                incorrect_terms.remove(term_to_remove)
+            if definition_to_remove in incorrect_definitions:
+                incorrect_definitions.remove(definition_to_remove)
 
-        # Check if review list is empty
-        if not incorrect_terms:
-            switch_to_normal_mode()
-            return
+            # Check if review list is empty
+            if not incorrect_terms:
+                switch_to_normal_mode()
+                return
 
-    # Navigate to the next flashcard
-    change_flashcard("fwd")
+        # Navigate to the next flashcard
+        change_flashcard("fwd")
 
 
 def switch_modes():
@@ -132,7 +141,7 @@ def switch_modes():
 
 
 # Load flashcards from file
-flashcards_path = "C:/Users/a_pavlov23/OneDrive - Winchester College/Documents/GitHub/Quizzly/test_flashcards.csv"
+flashcards_path = "C:/Users/Alex/Documents/GitHub/Quizzly/test_flashcards.csv"
 terms, definitions = get_flashcards(flashcards_path)
 curr_flashcard_idx = 0
 answer_shown = False
