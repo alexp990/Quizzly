@@ -1,9 +1,9 @@
 from customtkinter import *
 import pandas as pd
-import time
 
-# //Review mode/normal mode deletion of items index out of range
-
+# //Does not return to normal mode after review mode all correct
+# //Needs to remove text when switching to review mode and back
+# //Does not remove from incorrect list in review mode and write mode
 
 def get_flashcards(csv_file: str):
     """Load flashcards from a CSV file."""
@@ -47,6 +47,8 @@ def show_or_hide_answer():
                 if user_entry == definition.strip().lower():
                     print("Correct!")
                     answer_entry.configure(text_color="#4ceb34")
+                    remove_from_incorrect_list(terms[curr_flashcard_idx], definitions[curr_flashcard_idx])
+
                 else:
                     print("Wrong!")
                     answer_entry.configure(text_color="red")
@@ -63,6 +65,7 @@ def switch_to_review_mode():
     terms = incorrect_terms
     definitions = incorrect_definitions
     curr_flashcard_idx = 0
+    answer_entry.delete(0, "end")
     show_flashcard()
     if write_mode:
         answer_entry.configure(text_color="yellow")
@@ -77,6 +80,7 @@ def switch_to_normal_mode():
     curr_flashcard_idx = 0
     if write_mode:
         answer_entry.configure(text_color="yellow")
+    answer_entry.delete(0, "end")
     show_flashcard()
     print("normal mode")
 
@@ -106,6 +110,15 @@ def add_flashcard_to_incorrect_list(flashcard_idx: int):
     if definitions[flashcard_idx] not in incorrect_definitions:
         incorrect_definitions.append(definitions[flashcard_idx])
     print(incorrect_terms, incorrect_definitions)
+
+def remove_from_incorrect_list(term, definition):
+    """Removes terms gotten correct by user from list containing incorrect items"""
+    global incorrect_terms, incorrect_definitions
+    incorrect_terms.remove(term)
+    incorrect_definitions.remove(definition)
+    if not incorrect_terms:
+        switch_to_normal_mode()
+
 
 
 def mark_correct_and_continue():
